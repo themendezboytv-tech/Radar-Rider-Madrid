@@ -2,14 +2,23 @@
 # ASR BOT - CONFIGURACIÓN
 # =====================================================
 
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# =====================================================
 # TOKEN DEL BOT
-TOKEN = "8989376202:AAFQzroEJq-LQhBqPsuUdyflE1O8AKsry-I"
+# =====================================================
+
+TOKEN = os.getenv("TOKEN")
 
 # =====================================================
 # GRUPO OFICIAL ASR
 # =====================================================
 
-GROUP_ID = -1004297250557
+GROUP_ID = int(os.getenv("GROUP_ID"))
 
 # Compatibilidad con versiones anteriores
 GROUP_CHAT_ID = GROUP_ID
