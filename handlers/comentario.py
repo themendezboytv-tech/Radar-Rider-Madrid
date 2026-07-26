@@ -3,7 +3,7 @@ import asyncio
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from config import GROUP_ID
+from config import GROUP_ID, CHANNEL_ID
 from handlers.menu_principal import mostrar_menu
 
 
@@ -41,7 +41,7 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
         linea_direccion = f"📍 {latitud:.6f}, {longitud:.6f}"
 
     # ==========================================
-    # MENSAJE PARA EL GRUPO
+    # MENSAJE
     # ==========================================
 
     mensaje = (
@@ -70,6 +70,15 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     await context.bot.send_message(
         chat_id=GROUP_ID,
+        text=mensaje,
+    )
+
+    # ==========================================
+    # PUBLICAR EN EL CANAL
+    # ==========================================
+
+    await context.bot.send_message(
+        chat_id=CHANNEL_ID,
         text=mensaje,
     )
 

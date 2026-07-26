@@ -15,10 +15,16 @@ load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 # =====================================================
-# GRUPO OFICIAL ASR
+# GRUPO OFICIAL
 # =====================================================
 
 GROUP_ID = int(os.getenv("GROUP_ID"))
+
+# =====================================================
+# CANAL OFICIAL
+# =====================================================
+
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
 # Compatibilidad con versiones anteriores
 GROUP_CHAT_ID = GROUP_ID
@@ -33,4 +39,4 @@ BOT_NAME = "Radar Rider Madrid 🛵"
 # VERSIÓN
 # =====================================================
 
-VERSION = "1.2"
+VERSION = "1.2.1"
