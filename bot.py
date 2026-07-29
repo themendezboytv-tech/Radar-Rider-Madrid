@@ -18,6 +18,7 @@ from handlers.nuevo_aviso import (
     pedir_ubicacion,
 )
 from handlers.ubicacion import recibir_ubicacion
+from handlers.avisos_cerca import avisos_cerca
 from handlers.comentario import recibir_comentario
 
 from handlers.acerca import acerca
@@ -81,9 +82,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif texto == "📍 Avisos cerca":
 
-        await update.message.reply_text(
-            "🚧 Disponible próximamente."
-        )
+        await avisos_cerca(update, context)
         return
 
     elif texto == "🗺️ Ver mapa":

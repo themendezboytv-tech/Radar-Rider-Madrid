@@ -1,12 +1,14 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from config import VERSION
+
 
 async def acerca(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     mensaje = (
         "🛵 *Radar Rider Madrid*\n\n"
-        "Versión: *1.2*\n\n"
+        f"Versión: *{VERSION}*\n\n"
         "Una comunidad creada por repartidores,\n"
         "para repartidores.\n\n"
         "Nuestro objetivo es compartir\n"
