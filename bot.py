@@ -9,6 +9,8 @@ from telegram.ext import (
 
 from config import TOKEN
 
+from database.database import init_db
+
 from handlers.start import start
 from handlers.menu_principal import mostrar_menu
 from handlers.nuevo_aviso import (
@@ -28,6 +30,36 @@ from handlers.mapa import mapa
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     texto = update.message.text
+
+    # ==========================================
+    # CANCELAR / VOLVER
+    # ==========================================
+    # Estas dos opciones deben cortar cualquier flujo en curso
+    # (incluido "esperando_comentario"), así que se comprueban
+    # ANTES de mirar si estamos esperando un comentario. Si no,
+    # pulsar "Cancelar" mientras se espera el comentario se
+    # guardaba y publicaba como si "❌ Cancelar" fuera el
+    # comentario real (bug detectado en las pruebas de v1.3).
+
+    if texto == "❌ Cancelar":
+
+        context.user_data.clear()
+
+        await update.message.reply_text(
+            "❌ Aviso cancelado correctamente."
+        )
+
+        await mostrar_menu(update, context)
+
+        return
+
+    elif texto == "⬅️ Volver":
+
+        context.user_data.clear()
+
+        await mostrar_menu(update, context)
+
+        return
 
     # ==========================================
     # ESPERANDO COMENTARIO
@@ -101,38 +133,9 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ]:
 
-        await update.message.reply_text(
-            "🚧 Esta categoría estará disponible muy pronto.\n\n"
-            "Actualmente estamos validando el sistema de Alertas Viales."
-        )
+        context.user_data["tipo_aviso"] = texto
 
-        return
-
-    # ==========================================
-    # VOLVER
-    # ==========================================
-
-    elif texto == "⬅️ Volver":
-
-        context.user_data.clear()
-
-        await mostrar_menu(update, context)
-
-        return
-
-    # ==========================================
-    # CANCELAR
-    # ==========================================
-
-    elif texto == "❌ Cancelar":
-
-        context.user_data.clear()
-
-        await update.message.reply_text(
-            "❌ Aviso cancelado correctamente."
-        )
-
-        await mostrar_menu(update, context)
+        await pedir_ubicacion(update, context)
 
         return
 
@@ -146,6 +149,14 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
+
+    # ==========================================
+    # INICIALIZAR BASE DE DATOS
+    # ==========================================
+    # Crea las tablas si no existen. Idempotente: se puede
+    # llamar en cada arranque sin problema.
+
+    init_db()
 
     app = Application.builder().token(TOKEN).build()
 

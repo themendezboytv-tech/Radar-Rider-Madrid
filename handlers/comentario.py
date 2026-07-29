@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 
 from config import GROUP_ID, CHANNEL_ID
 from handlers.menu_principal import mostrar_menu
+from database.database import guardar_aviso
 
 
 async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -24,6 +25,24 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     calle = direccion.get("calle", "")
     numero = direccion.get("numero", "")
     ciudad = direccion.get("ciudad", "")
+
+    # ==========================================
+    # GUARDAR EN BASE DE DATOS
+    # ==========================================
+    # Se guarda ANTES de publicar en Telegram: si algo falla
+    # al enviar el mensaje, el aviso no se pierde igualmente.
+
+    usuario = update.effective_user
+
+    aviso_id = guardar_aviso(
+        user_id=usuario.id,
+        username=usuario.username or usuario.first_name,
+        tipo=tipo,
+        latitud=latitud,
+        longitud=longitud,
+        direccion=direccion,
+        comentario=comentario,
+    )
 
     # ==========================================
     # CONSTRUIR DIRECCIÓN
