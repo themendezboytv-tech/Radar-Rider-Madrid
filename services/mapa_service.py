@@ -39,6 +39,13 @@ def generar_mapa_imagen(avisos):
 
     try:
         from staticmap import StaticMap, CircleMarker
+        from PIL import Image
+
+        # staticmap 0.5.x llama a Image.ANTIALIAS, que Pillow quito en
+        # la version 10 (renombrado a Image.LANCZOS). Sin este shim,
+        # generar_mapa_imagen() falla siempre con Pillow >= 10.
+        if not hasattr(Image, "ANTIALIAS"):
+            Image.ANTIALIAS = Image.LANCZOS
     except ImportError:
         return None
 

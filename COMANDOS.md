@@ -80,6 +80,8 @@ pip install -r requirements.txt
 
 Después crea tu archivo `.env` (copia `.env.example`, renómbralo a `.env` y rellena `TOKEN`, `GROUP_ID`, `CHANNEL_ID` con los datos de tu bot de pruebas).
 
+`ADMIN_USER_ID` es opcional: tu user_id de Telegram, para poder usar `/chatid` (saca el ID del chat/grupo/canal donde lo escribas). Si lo dejas vacío, `/chatid` no responde a nadie.
+
 ---
 
 ## ⚠️ Notas importantes

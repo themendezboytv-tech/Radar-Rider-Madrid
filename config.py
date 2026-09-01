@@ -30,6 +30,14 @@ CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 GROUP_CHAT_ID = GROUP_ID
 
 # =====================================================
+# ADMIN (comandos restringidos, ej. /chatid)
+# =====================================================
+# Si se deja vacio, /chatid no responde a nadie.
+
+_admin_user_id = os.getenv("ADMIN_USER_ID")
+ADMIN_USER_ID = int(_admin_user_id) if _admin_user_id else None
+
+# =====================================================
 # NOMBRE DEL BOT
 # =====================================================
 
@@ -39,4 +47,4 @@ BOT_NAME = "Radar Rider Madrid 🛵"
 # VERSIÓN
 # =====================================================
 
-VERSION = "1.4.1"
+VERSION = "1.5"

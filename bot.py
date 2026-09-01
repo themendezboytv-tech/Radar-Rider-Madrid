@@ -37,7 +37,8 @@ from handlers.acerca import acerca
 from handlers.normas import normas
 from handlers.configuracion import configuracion
 from handlers.estadisticas import estadisticas
-from handlers.mapa import mapa
+from handlers.mapa import mapa, mapa_imagen, mapa_html
+from handlers.admin import chatid
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -100,6 +101,16 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif texto == "🗺️ Ver mapa":
 
         await mapa(update, context)
+        return
+
+    elif texto == "🖼️ Mapa rápido":
+
+        await mapa_imagen(update, context)
+        return
+
+    elif texto == "🌐 Mapa interactivo":
+
+        await mapa_html(update, context)
         return
 
     elif texto == "📊 Estadísticas":
@@ -175,6 +186,13 @@ def main():
         CommandHandler(
             "start",
             start,
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "chatid",
+            chatid,
         )
     )
 
