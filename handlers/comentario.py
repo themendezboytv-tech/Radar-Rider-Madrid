@@ -6,6 +6,7 @@ from telegram.ext import ContextTypes
 from config import GROUP_ID, CHANNEL_ID
 from handlers.menu_principal import mostrar_menu
 from database.database import guardar_aviso
+from services.whatsapp import enviar_alerta_whatsapp
 
 
 async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -100,6 +101,14 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
         chat_id=CHANNEL_ID,
         text=mensaje,
     )
+
+    # ==========================================
+    # ENVIAR TAMBIÉN POR WHATSAPP (best-effort)
+    # ==========================================
+    # No debe afectar al flujo de Telegram: si OpenWA falla o no hay
+    # destino configurado, la alerta ya está publicada igualmente.
+
+    await asyncio.to_thread(enviar_alerta_whatsapp, mensaje)
 
     # ==========================================
     # LIMPIAR SESIÓN
