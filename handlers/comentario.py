@@ -3,9 +3,11 @@ import asyncio
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
+from geopy.distance import geodesic
+
 from config import GROUP_ID, CHANNEL_ID
 from handlers.menu_principal import mostrar_menu
-from database.database import guardar_aviso
+from database.database import guardar_aviso, obtener_usuarios_con_notificaciones
 from services.whatsapp import enviar_alerta_whatsapp
 
 
@@ -121,6 +123,17 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await asyncio.to_thread(enviar_alerta_whatsapp, mensaje)
 
     # ==========================================
+    # NOTIFICAR A USUARIOS CERCA (v1.8, best-effort)
+    # ==========================================
+    # No debe afectar al flujo si algo falla: el aviso ya está
+    # guardado y publicado igualmente.
+
+    try:
+        await _notificar_usuarios_cerca(context, tipo, latitud, longitud, calle)
+    except Exception:
+        pass
+
+    # ==========================================
     # LIMPIAR SESIÓN
     # ==========================================
 
@@ -146,3 +159,49 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # ==========================================
 
     await mostrar_menu(update, context)
+
+
+# =====================================================
+# NOTIFICACIONES INTELIGENTES (v1.8)
+# =====================================================
+
+async def _notificar_usuarios_cerca(
+    context: ContextTypes.DEFAULT_TYPE,
+    tipo: str,
+    latitud: float,
+    longitud: float,
+    calle: str,
+):
+    """
+    Avisa por privado a los usuarios con notificaciones activas
+    cuya ubicación de referencia está dentro de su radio respecto
+    al aviso recién publicado. Un fallo al enviar a un usuario
+    concreto no debe impedir avisar al resto.
+    """
+
+    origen = (latitud, longitud)
+
+    for usuario in obtener_usuarios_con_notificaciones():
+
+        destino = (usuario["lat_referencia"], usuario["lon_referencia"])
+        distancia_km = geodesic(origen, destino).km
+
+        if distancia_km > usuario["radio_notificacion_km"]:
+            continue
+
+        mensaje = (
+            "🔔 Aviso cerca de tu zona\n\n"
+            f"{tipo}\n"
+            f"📏 {distancia_km:.1f} km"
+        )
+
+        if calle:
+            mensaje += f"\n📍 {calle}"
+
+        try:
+            await context.bot.send_message(
+                chat_id=usuario["user_id"],
+                text=mensaje,
+            )
+        except Exception:
+            pass

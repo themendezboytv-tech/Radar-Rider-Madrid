@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from services.geocoder import obtener_direccion
 from handlers.avisos_cerca import mostrar_avisos_cercanos
+from handlers.configuracion import pedir_radio_notificacion
 
 
 async def recibir_ubicacion(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -20,6 +21,15 @@ async def recibir_ubicacion(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("buscando_cerca"):
 
         await mostrar_avisos_cercanos(update, context, latitud, longitud)
+        return
+
+    # ==========================================
+    # FLUJO: ACTIVANDO NOTIFICACIONES (v1.8)
+    # ==========================================
+
+    if context.user_data.get("configurando_notificaciones"):
+
+        await pedir_radio_notificacion(update, context, latitud, longitud)
         return
 
     # ==========================================

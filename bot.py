@@ -24,7 +24,12 @@ from handlers.comentario import recibir_comentario
 
 from handlers.acerca import acerca
 from handlers.normas import normas
-from handlers.configuracion import configuracion
+from handlers.configuracion import (
+    configuracion,
+    pedir_ubicacion_notificacion,
+    recibir_radio_notificacion,
+    desactivar_notificaciones,
+)
 from handlers.estadisticas import estadisticas
 from handlers.mapa import mapa, mapa_imagen, mapa_html
 from handlers.admin import chatid
@@ -75,6 +80,15 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ==========================================
+    # ESPERANDO RADIO DE NOTIFICACIONES (v1.8)
+    # ==========================================
+
+    if context.user_data.get("esperando_radio_notificacion"):
+
+        await recibir_radio_notificacion(update, context)
+        return
+
+    # ==========================================
     # MENÚ PRINCIPAL
     # ==========================================
 
@@ -111,6 +125,16 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif texto == "⚙️ Configuración":
 
         await configuracion(update, context)
+        return
+
+    elif texto == "📍 Activar notificaciones cerca de mí":
+
+        await pedir_ubicacion_notificacion(update, context)
+        return
+
+    elif texto == "🔕 Desactivar notificaciones":
+
+        await desactivar_notificaciones(update, context)
         return
 
     elif texto == "ℹ️ Acerca de":

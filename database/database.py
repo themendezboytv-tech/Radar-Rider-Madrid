@@ -130,6 +130,21 @@ def init_db():
             """
         )
 
+        # Migración v1.8 (notificaciones inteligentes): la tabla
+        # usuarios ya existe en producción sin estas columnas, así
+        # que se añaden con ALTER TABLE + try/except en vez de
+        # tocar el CREATE TABLE (SQLite no soporta "ADD COLUMN IF
+        # NOT EXISTS").
+        for ddl in (
+            "ALTER TABLE usuarios ADD COLUMN radio_notificacion_km REAL",
+            "ALTER TABLE usuarios ADD COLUMN lat_referencia REAL",
+            "ALTER TABLE usuarios ADD COLUMN lon_referencia REAL",
+        ):
+            try:
+                conn.execute(ddl)
+            except sqlite3.OperationalError:
+                pass
+
 
 # =====================================================
 # HELPERS INTERNOS
@@ -345,3 +360,77 @@ def marcar_como_falso(aviso_id: int) -> None:
                 """,
                 (fila["user_id"],),
             )
+
+
+# =====================================================
+# NOTIFICACIONES INTELIGENTES (v1.8)
+# =====================================================
+
+def activar_notificaciones(
+    user_id: int,
+    username: str | None,
+    lat: float,
+    lon: float,
+    radio_km: float,
+) -> None:
+    """Activa (o actualiza) las notificaciones de cercanía de un usuario."""
+
+    with get_connection() as conn:
+
+        _asegurar_usuario(conn, user_id, username)
+
+        conn.execute(
+            """
+            UPDATE usuarios
+            SET radio_notificacion_km = ?,
+                lat_referencia = ?,
+                lon_referencia = ?
+            WHERE user_id = ?
+            """,
+            (radio_km, lat, lon, user_id),
+        )
+
+
+def desactivar_notificaciones(user_id: int) -> None:
+    """Desactiva las notificaciones de cercanía de un usuario."""
+
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE usuarios SET radio_notificacion_km = NULL WHERE user_id = ?",
+            (user_id,),
+        )
+
+
+def obtener_config_notificaciones(user_id: int) -> sqlite3.Row | None:
+    """Devuelve la config de notificaciones de un usuario (o None si no existe)."""
+
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            SELECT radio_notificacion_km, lat_referencia, lon_referencia
+            FROM usuarios
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        )
+        return cursor.fetchone()
+
+
+def obtener_usuarios_con_notificaciones() -> list[sqlite3.Row]:
+    """
+    Usuarios con notificaciones activas (radio y ubicación de
+    referencia guardados). Base para el aviso automático en
+    handlers/comentario.py.
+    """
+
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            SELECT user_id, lat_referencia, lon_referencia, radio_notificacion_km
+            FROM usuarios
+            WHERE radio_notificacion_km IS NOT NULL
+              AND lat_referencia IS NOT NULL
+              AND lon_referencia IS NOT NULL
+            """
+        )
+        return cursor.fetchall()
