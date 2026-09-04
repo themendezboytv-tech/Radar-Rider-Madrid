@@ -39,6 +39,112 @@ def _color_para(tipo: str) -> str:
 
 
 # =====================================================
+# FORMAS POR TIPO DE AVISO (mapa imagen, v1.9.1)
+# =====================================================
+# staticmap es mas limitado que folium: CircleMarker solo admite
+# color/radio, sin iconos. Su IconMarker si admite una imagen
+# cualquiera, asi que en vez de agregar una libreria de iconos
+# (dependencia pesada) se dibuja una FORMA simple por tipo con PIL
+# (ya es dependencia del proyecto) manteniendo el mismo color de
+# COLOR_POR_TIPO - el color no se toca, la forma es el diferenciador
+# extra.
+
+FORMA_POR_TIPO = {
+    "🚓 Presencia policial": "circulo",
+    "🚧 Calle cortada": "cuadrado",
+    "🚦 Tráfico": "rombo",
+    "🚑 Accidente": "cruz",
+    "⚠️ Peligro": "triangulo",
+    "📦 Otro": "hexagono",
+}
+
+FORMA_DEFECTO = "hexagono"
+
+ICONO_TAM = 28
+
+
+def _generar_icono_marcador(tipo: str) -> str:
+    """
+    Genera (o reutiliza, si ya existe con ese nombre) un PNG pequeño
+    con la forma correspondiente al tipo, relleno con su color de
+    COLOR_POR_TIPO. Devuelve la ruta del archivo para pasarla a
+    IconMarker.
+    """
+
+    import math
+    from PIL import Image, ImageDraw
+
+    color = _color_para(tipo)
+    forma = FORMA_POR_TIPO.get(tipo, FORMA_DEFECTO)
+
+    ruta = os.path.join(
+        tempfile.gettempdir(),
+        f"rrm_icono_{forma}_{color.lstrip('#')}.png",
+    )
+
+    if os.path.exists(ruta):
+        return ruta
+
+    tam = ICONO_TAM
+    margen = 2
+
+    img = Image.new("RGBA", (tam, tam), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    if forma == "circulo":
+
+        draw.ellipse([margen, margen, tam - margen, tam - margen], fill=color, outline="white", width=2)
+
+    elif forma == "cuadrado":
+
+        draw.rectangle([margen, margen, tam - margen, tam - margen], fill=color, outline="white", width=2)
+
+    elif forma == "rombo":
+
+        centro = tam / 2
+
+        draw.polygon(
+            [(centro, margen), (tam - margen, centro), (centro, tam - margen), (margen, centro)],
+            fill=color,
+            outline="white",
+        )
+
+    elif forma == "triangulo":
+
+        draw.polygon(
+            [(tam / 2, margen), (tam - margen, tam - margen), (margen, tam - margen)],
+            fill=color,
+            outline="white",
+        )
+
+    elif forma == "cruz":
+
+        ancho = tam * 0.34
+
+        draw.rectangle([tam / 2 - ancho / 2, margen, tam / 2 + ancho / 2, tam - margen], fill=color)
+        draw.rectangle([margen, tam / 2 - ancho / 2, tam - margen, tam / 2 + ancho / 2], fill=color)
+
+    else:  # hexágono ("Otro" y cualquier tipo desconocido)
+
+        centro = tam / 2
+        radio = centro - margen
+
+        puntos = [
+            (
+                centro + radio * math.cos(math.radians(60 * i - 30)),
+                centro + radio * math.sin(math.radians(60 * i - 30)),
+            )
+            for i in range(6)
+        ]
+
+        draw.polygon(puntos, fill=color, outline="white")
+
+    img.save(ruta)
+
+    return ruta
+
+
+# =====================================================
 # MAPA COMO IMAGEN (staticmap)
 # =====================================================
 
@@ -51,7 +157,7 @@ def generar_mapa_imagen(avisos):
     """
 
     try:
-        from staticmap import StaticMap, CircleMarker
+        from staticmap import StaticMap, IconMarker
         from PIL import Image
 
         # staticmap 0.5.x llama a Image.ANTIALIAS, que Pillow quito en
@@ -72,12 +178,20 @@ def generar_mapa_imagen(avisos):
             tile_request_timeout=10,
         )
 
+        iconos_por_tipo = {}
+
         for aviso in avisos:
 
-            marcador = CircleMarker(
+            tipo = aviso["tipo"]
+
+            if tipo not in iconos_por_tipo:
+                iconos_por_tipo[tipo] = _generar_icono_marcador(tipo)
+
+            marcador = IconMarker(
                 (aviso["longitud"], aviso["latitud"]),
-                _color_para(aviso["tipo"]),
-                14,
+                iconos_por_tipo[tipo],
+                ICONO_TAM // 2,
+                ICONO_TAM // 2,
             )
 
             mapa.add_marker(marcador)
@@ -95,6 +209,29 @@ def generar_mapa_imagen(avisos):
 
     except Exception:
         return None
+
+
+# =====================================================
+# ÍCONOS POR TIPO DE AVISO (mapa interactivo, v1.9.1)
+# =====================================================
+# folium.Icon usa nombres de Font Awesome 4 (prefix="fa") y una
+# paleta de colores fija propia (no acepta hex, a diferencia de
+# CircleMarker) - por eso es un mapeo aparte de COLOR_POR_TIPO.
+
+ICONO_POR_TIPO = {
+    "🚓 Presencia policial": ("car", "blue"),
+    "🚧 Calle cortada": ("road", "beige"),
+    "🚦 Tráfico": ("car", "orange"),
+    "🚑 Accidente": ("ambulance", "red"),
+    "⚠️ Peligro": ("exclamation-triangle", "purple"),
+    "📦 Otro": ("info-circle", "gray"),
+}
+
+ICONO_DEFECTO = ("info-circle", "gray")
+
+
+def _icono_para(tipo: str) -> tuple:
+    return ICONO_POR_TIPO.get(tipo, ICONO_DEFECTO)
 
 
 # =====================================================
@@ -140,14 +277,12 @@ def generar_mapa_html(avisos):
             if aviso["comentario"]:
                 popup_texto += f"💬 {aviso['comentario']}"
 
-            folium.CircleMarker(
+            icono, color = _icono_para(aviso["tipo"])
+
+            folium.Marker(
                 location=[aviso["latitud"], aviso["longitud"]],
-                radius=10,
-                color=_color_para(aviso["tipo"]),
-                fill=True,
-                fill_color=_color_para(aviso["tipo"]),
-                fill_opacity=0.9,
                 popup=folium.Popup(popup_texto, max_width=250),
+                icon=folium.Icon(color=color, icon=icono, prefix="fa"),
             ).add_to(mapa)
 
         ruta = os.path.join(
