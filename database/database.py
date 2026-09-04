@@ -26,7 +26,13 @@ from contextlib import contextmanager
 # RUTA DE LA BASE DE DATOS
 # =====================================================
 
-DB_DIR = os.path.dirname(os.path.abspath(__file__))
+# DB_DIR es configurable via variable de entorno para poder apuntar
+# a un volumen persistente (ej. /app/data en Docker, mapeado a un
+# bind mount del host). Si no se define, se usa la carpeta del propio
+# módulo (comportamiento anterior, útil para correr el bot fuera de
+# Docker sin configuración extra).
+DB_DIR = os.getenv("DB_DIR", os.path.dirname(os.path.abspath(__file__)))
+os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, "radar_rider_madrid.db")
 
 # Minutos de vigencia por defecto según el tipo de aviso.
