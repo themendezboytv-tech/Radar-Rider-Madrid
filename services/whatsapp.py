@@ -14,18 +14,23 @@ from config import (
     OPENWA_SESSION_ID,
     WHATSAPP_ALERT_PHONE,
     WHATSAPP_GROUP_ID,
+    WHATSAPP_GROUP_ID_TEST,
 )
 
 
 def enviar_alerta_whatsapp(mensaje: str) -> bool:
-    """Manda `mensaje` por WhatsApp via OpenWA. Si WHATSAPP_GROUP_ID
-    esta configurado se usa el grupo (tiene prioridad); si no, se usa
-    el numero personal WHATSAPP_ALERT_PHONE. Devuelve False (sin
+    """Manda `mensaje` por WhatsApp via OpenWA. Prioridad de destino:
+    WHATSAPP_GROUP_ID (grupo real de produccion) > WHATSAPP_GROUP_ID_TEST
+    (grupo de pruebas) > WHATSAPP_ALERT_PHONE (numero personal). Asi,
+    en cuanto se rellene el grupo real no hace falta tocar este
+    codigo - solo vaciar WHATSAPP_GROUP_ID_TEST. Devuelve False (sin
     lanzar excepcion) si falta configuracion o si el envio falla por
     cualquier motivo."""
 
     if WHATSAPP_GROUP_ID:
         chat_id = WHATSAPP_GROUP_ID
+    elif WHATSAPP_GROUP_ID_TEST:
+        chat_id = WHATSAPP_GROUP_ID_TEST
     elif WHATSAPP_ALERT_PHONE:
         chat_id = f"{WHATSAPP_ALERT_PHONE}@c.us"
     else:

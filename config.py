@@ -55,6 +55,12 @@ WHATSAPP_ALERT_PHONE = os.getenv("WHATSAPP_ALERT_PHONE")
 # sin activar hasta tener el ID real del grupo.
 WHATSAPP_GROUP_ID = os.getenv("WHATSAPP_GROUP_ID")
 
+# WHATSAPP_GROUP_ID_TEST: grupo de WhatsApp de pruebas (mientras se
+# valida el formato de las alertas antes de activar el grupo real).
+# Tiene prioridad MENOR que WHATSAPP_GROUP_ID: en cuanto este ultimo
+# tenga valor, se usa el grupo real sin tocar codigo.
+WHATSAPP_GROUP_ID_TEST = os.getenv("WHATSAPP_GROUP_ID_TEST")
+
 # =====================================================
 # NOMBRE DEL BOT
 # =====================================================
