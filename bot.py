@@ -33,7 +33,8 @@ from handlers.configuracion import (
 from handlers.estadisticas import estadisticas
 from handlers.mapa import mapa, mapa_imagen, mapa_html
 from handlers.admin import chatid
-from handlers.moderacion import votar_falso
+from handlers.moderacion import votar_falso, votar_confirmado
+from handlers.ayuda import ayuda
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -137,6 +138,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await desactivar_notificaciones(update, context)
         return
 
+    elif texto == "❓ Ayuda":
+
+        await ayuda(update, context)
+        return
+
     elif texto == "ℹ️ Acerca de":
 
         await acerca(update, context)
@@ -228,6 +234,13 @@ def main():
         CallbackQueryHandler(
             votar_falso,
             pattern=r"^falso:",
+        )
+    )
+
+    app.add_handler(
+        CallbackQueryHandler(
+            votar_confirmado,
+            pattern=r"^confirmado:",
         )
     )
 

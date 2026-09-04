@@ -49,6 +49,12 @@ OPENWA_API_KEY = os.getenv("OPENWA_API_KEY")
 OPENWA_SESSION_ID = os.getenv("OPENWA_SESSION_ID")
 WHATSAPP_ALERT_PHONE = os.getenv("WHATSAPP_ALERT_PHONE")
 
+# WHATSAPP_GROUP_ID (formato "1234567890-1234567890@g.us"): si se
+# define, el envio usa el grupo en vez del numero personal
+# (WHATSAPP_ALERT_PHONE). Vacio por defecto - capacidad lista pero
+# sin activar hasta tener el ID real del grupo.
+WHATSAPP_GROUP_ID = os.getenv("WHATSAPP_GROUP_ID")
+
 # =====================================================
 # NOMBRE DEL BOT
 # =====================================================
@@ -59,4 +65,4 @@ BOT_NAME = "Radar Rider Madrid 🛵"
 # VERSIÓN
 # =====================================================
 
-VERSION = "1.5"
+VERSION = "1.9.0"

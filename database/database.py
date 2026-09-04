@@ -151,6 +151,15 @@ def init_db():
             except sqlite3.OperationalError:
                 pass
 
+        # Migración v1.9 (botón "✅ Confirmado"): mismo patrón que la
+        # de v1.8, esta vez sobre la tabla avisos.
+        try:
+            conn.execute(
+                "ALTER TABLE avisos ADD COLUMN votos_confirmado INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
+
 
 # =====================================================
 # HELPERS INTERNOS
@@ -366,6 +375,20 @@ def marcar_como_falso(aviso_id: int) -> None:
                 """,
                 (fila["user_id"],),
             )
+
+
+def confirmar_aviso(aviso_id: int) -> None:
+    """
+    Incrementa el contador de votos "confirmado" de un aviso.
+    Puramente informativo (v1.9): sin umbral ni efecto sobre
+    reputación o estado del aviso, a diferencia de marcar_como_falso().
+    """
+
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE avisos SET votos_confirmado = votos_confirmado + 1 WHERE id = ?",
+            (aviso_id,),
+        )
 
 
 # =====================================================

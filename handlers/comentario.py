@@ -86,12 +86,15 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"https://maps.google.com/?q={latitud},{longitud}"
     )
 
+    mensaje += f"\n\n👤 Reportado por: {usuario.username or usuario.first_name}"
+
     # ==========================================
-    # BOTÓN DE MODERACIÓN (v1.7 - reputación)
+    # BOTONES DE MODERACIÓN (v1.7 falso / v1.9 confirmado)
     # ==========================================
 
     botones = InlineKeyboardMarkup([[
         InlineKeyboardButton("👎 No es real", callback_data=f"falso:{aviso_id}"),
+        InlineKeyboardButton("✅ Confirmado", callback_data=f"confirmado:{aviso_id}"),
     ]])
 
     # ==========================================

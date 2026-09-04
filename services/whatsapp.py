@@ -13,15 +13,22 @@ from config import (
     OPENWA_API_KEY,
     OPENWA_SESSION_ID,
     WHATSAPP_ALERT_PHONE,
+    WHATSAPP_GROUP_ID,
 )
 
 
 def enviar_alerta_whatsapp(mensaje: str) -> bool:
-    """Manda `mensaje` por WhatsApp al numero WHATSAPP_ALERT_PHONE via
-    OpenWA. Devuelve False (sin lanzar excepcion) si falta configuracion
-    o si el envio falla por cualquier motivo."""
+    """Manda `mensaje` por WhatsApp via OpenWA. Si WHATSAPP_GROUP_ID
+    esta configurado se usa el grupo (tiene prioridad); si no, se usa
+    el numero personal WHATSAPP_ALERT_PHONE. Devuelve False (sin
+    lanzar excepcion) si falta configuracion o si el envio falla por
+    cualquier motivo."""
 
-    if not WHATSAPP_ALERT_PHONE:
+    if WHATSAPP_GROUP_ID:
+        chat_id = WHATSAPP_GROUP_ID
+    elif WHATSAPP_ALERT_PHONE:
+        chat_id = f"{WHATSAPP_ALERT_PHONE}@c.us"
+    else:
         return False
 
     url = f"{OPENWA_BASE_URL}/api/sessions/{OPENWA_SESSION_ID}/messages/send-text"
@@ -29,7 +36,7 @@ def enviar_alerta_whatsapp(mensaje: str) -> bool:
     try:
         r = requests.post(
             url,
-            json={"chatId": f"{WHATSAPP_ALERT_PHONE}@c.us", "text": mensaje},
+            json={"chatId": chat_id, "text": mensaje},
             headers={"X-API-Key": OPENWA_API_KEY},
             timeout=10,
         )
