@@ -2,7 +2,11 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from keyboards.aviso_menu import get_location_menu
-from keyboards.configuracion_menu import get_configuracion_menu, get_radio_menu
+from keyboards.configuracion_menu import (
+    get_menu_configuracion,
+    get_configuracion_menu,
+    get_radio_menu,
+)
 from handlers.menu_principal import mostrar_menu
 
 from database.database import (
@@ -15,7 +19,23 @@ RADIOS_DISPONIBLES = {"2 km": 2, "5 km": 5, "10 km": 10}
 
 
 # =====================================================
-# PANTALLA PRINCIPAL DE CONFIGURACIÓN
+# SUBMENÚ DE CONFIGURACIÓN (v1.9.2)
+# =====================================================
+# Punto de entrada desde el menú principal. Notificaciones, Acerca
+# de, Ayuda y Normas cuelgan de aquí.
+
+async def menu_configuracion(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data.clear()
+
+    await update.message.reply_text(
+        "⚙️ Configuración",
+        reply_markup=get_menu_configuracion(),
+    )
+
+
+# =====================================================
+# NOTIFICACIONES: ESTADO ACTUAL Y ACTIVAR/DESACTIVAR
 # =====================================================
 
 async def configuracion(update: Update, context: ContextTypes.DEFAULT_TYPE):

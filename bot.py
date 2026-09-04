@@ -25,6 +25,7 @@ from handlers.comentario import recibir_comentario
 from handlers.acerca import acerca
 from handlers.normas import normas
 from handlers.configuracion import (
+    menu_configuracion,
     configuracion,
     pedir_ubicacion_notificacion,
     recibir_radio_notificacion,
@@ -124,6 +125,11 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif texto == "⚙️ Configuración":
+
+        await menu_configuracion(update, context)
+        return
+
+    elif texto == "📍 Notificaciones":
 
         await configuracion(update, context)
         return

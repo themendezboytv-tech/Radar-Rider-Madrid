@@ -1,6 +1,24 @@
 from telegram import ReplyKeyboardMarkup
 
 
+def get_menu_configuracion():
+
+    keyboard = [
+        ["📍 Notificaciones"],
+        ["ℹ️ Acerca de"],
+        ["❓ Ayuda"],
+        ["📜 Normas"],
+        ["⬅️ Volver"],
+    ]
+
+    return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        resize_keyboard=True,
+        one_time_keyboard=False,
+        input_field_placeholder="Selecciona una opción...",
+    )
+
+
 def get_configuracion_menu():
 
     keyboard = [

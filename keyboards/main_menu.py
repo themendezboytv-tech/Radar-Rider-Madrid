@@ -5,10 +5,8 @@ def get_main_menu():
 
     keyboard = [
         ["🚨 Nuevo aviso"],
-        ["❓ Ayuda"],
         ["📍 Avisos cerca", "🗺️ Ver mapa"],
         ["📊 Estadísticas", "⚙️ Configuración"],
-        ["ℹ️ Acerca de", "📜 Normas"],
     ]
 
     return ReplyKeyboardMarkup(
