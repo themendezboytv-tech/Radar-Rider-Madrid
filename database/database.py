@@ -216,7 +216,8 @@ def guardar_aviso(
         conn.execute(
             """
             UPDATE usuarios
-            SET avisos_publicados = avisos_publicados + 1
+            SET avisos_publicados = avisos_publicados + 1,
+                puntos_reputacion = puntos_reputacion + 1
             WHERE user_id = ?
             """,
             (user_id,),
@@ -305,8 +306,8 @@ def marcar_como_falso(aviso_id: int) -> None:
     """
     Incrementa el contador de votos "falso" de un aviso y,
     a partir de un umbral, lo marca como es_falso=1 (deja de
-    salir en obtener_avisos_activos). El umbral y la penalización
-    de puntos se implementarán en v1.7.
+    salir en obtener_avisos_activos) y penaliza al autor con
+    -1 punto de reputación.
     """
 
     UMBRAL_VOTOS_FALSO = 3
@@ -338,7 +339,8 @@ def marcar_como_falso(aviso_id: int) -> None:
             conn.execute(
                 """
                 UPDATE usuarios
-                SET avisos_falsos = avisos_falsos + 1
+                SET avisos_falsos = avisos_falsos + 1,
+                    puntos_reputacion = puntos_reputacion - 1
                 WHERE user_id = ?
                 """,
                 (fila["user_id"],),

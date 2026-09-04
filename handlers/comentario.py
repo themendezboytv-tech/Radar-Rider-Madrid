@@ -1,6 +1,6 @@
 import asyncio
 
-from telegram import Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from config import GROUP_ID, CHANNEL_ID
@@ -85,12 +85,21 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
     # ==========================================
+    # BOTÓN DE MODERACIÓN (v1.7 - reputación)
+    # ==========================================
+
+    botones = InlineKeyboardMarkup([[
+        InlineKeyboardButton("👎 No es real", callback_data=f"falso:{aviso_id}"),
+    ]])
+
+    # ==========================================
     # PUBLICAR EN EL GRUPO
     # ==========================================
 
     await context.bot.send_message(
         chat_id=GROUP_ID,
         text=mensaje,
+        reply_markup=botones,
     )
 
     # ==========================================
@@ -100,6 +109,7 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await context.bot.send_message(
         chat_id=CHANNEL_ID,
         text=mensaje,
+        reply_markup=botones,
     )
 
     # ==========================================

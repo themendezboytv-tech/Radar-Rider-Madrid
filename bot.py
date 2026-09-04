@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import (
     Application,
+    CallbackQueryHandler,
     CommandHandler,
     MessageHandler,
     ContextTypes,
@@ -27,6 +28,7 @@ from handlers.configuracion import configuracion
 from handlers.estadisticas import estadisticas
 from handlers.mapa import mapa, mapa_imagen, mapa_html
 from handlers.admin import chatid
+from handlers.moderacion import votar_falso
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -195,6 +197,13 @@ def main():
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             menu,
+        )
+    )
+
+    app.add_handler(
+        CallbackQueryHandler(
+            votar_falso,
+            pattern=r"^falso:",
         )
     )
 
