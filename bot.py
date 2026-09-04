@@ -6,18 +6,6 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-from config import TOKEN
-from database.database import init_db
-from handlers.start import start
-
-from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
 
 from config import TOKEN
 
