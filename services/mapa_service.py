@@ -20,6 +20,19 @@ COLOR_POR_TIPO = {
 
 COLOR_DEFECTO = "#546E7A"
 
+# =====================================================
+# USER-AGENT PARA TILES DE OPENSTREETMAP
+# =====================================================
+# La politica de uso de tiles de OSM (operations.osmfoundation.org/policies/tiles)
+# exige un User-Agent identificable con forma de contactar al operador.
+# Sin esto, tile.openstreetmap.org responde 403 "Access blocked" (bloquea el
+# User-Agent generico de requests/urllib). Referencia = URL del repo, para no
+# exponer un email personal en un repo publico.
+OSM_TILE_USER_AGENT = (
+    "RadarRiderMadrid/1.5 "
+    "(+https://github.com/themendezboytv-tech/Radar-Rider-Madrid)"
+)
+
 
 def _color_para(tipo: str) -> str:
     return COLOR_POR_TIPO.get(tipo, COLOR_DEFECTO)
@@ -55,6 +68,8 @@ def generar_mapa_imagen(avisos):
             700,
             500,
             url_template="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            headers={"User-Agent": OSM_TILE_USER_AGENT},
+            tile_request_timeout=10,
         )
 
         for aviso in avisos:
