@@ -38,6 +38,18 @@ _admin_user_id = os.getenv("ADMIN_USER_ID")
 ADMIN_USER_ID = int(_admin_user_id) if _admin_user_id else None
 
 # =====================================================
+# WHATSAPP (OpenWA, gateway self-hosted)
+# =====================================================
+# Para cambiar de sesion: edita OPENWA_SESSION_ID (y pide una clave
+# operador con allowedSessions al UUID nuevo). Si WHATSAPP_ALERT_PHONE
+# esta vacio, el envio por WhatsApp simplemente se omite.
+
+OPENWA_BASE_URL = os.getenv("OPENWA_BASE_URL", "http://100.81.109.95:2785")
+OPENWA_API_KEY = os.getenv("OPENWA_API_KEY")
+OPENWA_SESSION_ID = os.getenv("OPENWA_SESSION_ID")
+WHATSAPP_ALERT_PHONE = os.getenv("WHATSAPP_ALERT_PHONE")
+
+# =====================================================
 # NOMBRE DEL BOT
 # =====================================================
 
