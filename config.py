@@ -36,7 +36,7 @@ GROUP_CHAT_ID = GROUP_ID
 # operador con allowedSessions al UUID nuevo). Si WHATSAPP_ALERT_PHONE
 # esta vacio, el envio por WhatsApp simplemente se omite.
 
-OPENWA_BASE_URL = os.getenv("OPENWA_BASE_URL", "http://100.81.109.95:2785")
+OPENWA_BASE_URL = os.getenv("OPENWA_BASE_URL")
 OPENWA_API_KEY = os.getenv("OPENWA_API_KEY")
 OPENWA_SESSION_ID = os.getenv("OPENWA_SESSION_ID")
 WHATSAPP_ALERT_PHONE = os.getenv("WHATSAPP_ALERT_PHONE")
