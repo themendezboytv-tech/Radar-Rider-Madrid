@@ -19,6 +19,11 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if comentario == "-":
         comentario = ""
 
+    await publicar_aviso(update, context, comentario)
+
+
+async def publicar_aviso(update: Update, context: ContextTypes.DEFAULT_TYPE, comentario: str):
+
     tipo = context.user_data.get("tipo_aviso", "Sin definir")
 
     latitud = context.user_data.get("latitud")
@@ -149,7 +154,7 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # guardado y publicado igualmente.
 
     try:
-        await _notificar_usuarios_cerca(context, tipo, latitud, longitud, calle)
+        await _notificar_usuarios_cerca(context, tipo, latitud, longitud, calle, usuario.id)
     except Exception:
         pass
 
@@ -191,6 +196,7 @@ async def _notificar_usuarios_cerca(
     latitud: float,
     longitud: float,
     calle: str,
+    autor_id: int,
 ):
     """
     Avisa por privado a los usuarios con notificaciones activas
@@ -202,6 +208,9 @@ async def _notificar_usuarios_cerca(
     origen = (latitud, longitud)
 
     for usuario in obtener_usuarios_con_notificaciones():
+
+        if usuario["user_id"] == autor_id:
+            continue
 
         destino = (usuario["lat_referencia"], usuario["lon_referencia"])
         distancia_km = geodesic(origen, destino).km

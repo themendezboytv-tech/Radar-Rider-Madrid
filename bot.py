@@ -22,6 +22,7 @@ from handlers.nuevo_aviso import (
     pedir_ubicacion,
 )
 from handlers.ubicacion import recibir_ubicacion
+from handlers.ubicacion_vivo import recibir_ubicacion_vivo
 from handlers.avisos_cerca import avisos_cerca
 from handlers.comentario import recibir_comentario
 
@@ -254,6 +255,13 @@ def main():
         MessageHandler(
             filters.LOCATION,
             recibir_ubicacion,
+        )
+    )
+
+    app.add_handler(
+        MessageHandler(
+            filters.LOCATION & filters.UpdateType.EDITED_MESSAGE,
+            recibir_ubicacion_vivo,
         )
     )
 

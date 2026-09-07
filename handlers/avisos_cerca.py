@@ -37,7 +37,8 @@ async def avisos_cerca(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["buscando_cerca"] = True
 
     await update.message.reply_text(
-        "📍 Comparte tu ubicación para ver los avisos activos cerca de ti.",
+        "📍 Comparte tu ubicación (normal para ver qué hay cerca ahora, "
+        "o en vivo para que te avise mientras te mueves).",
         reply_markup=get_location_menu(),
     )
 

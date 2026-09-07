@@ -2,8 +2,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from services.geocoder import obtener_direccion
-from handlers.avisos_cerca import mostrar_avisos_cercanos
+from handlers.avisos_cerca import mostrar_avisos_cercanos, RADIO_KM
 from handlers.configuracion import pedir_radio_notificacion
+from handlers.comentario import publicar_aviso
+from handlers.ubicacion_vivo import iniciar_sesion_vivo
 
 
 async def recibir_ubicacion(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -19,6 +21,26 @@ async def recibir_ubicacion(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ==========================================
 
     if context.user_data.get("buscando_cerca"):
+
+        live_period = update.message.location.live_period
+
+        if live_period:
+
+            iniciar_sesion_vivo(
+                update.effective_user.id,
+                update.effective_chat.id,
+                live_period,
+            )
+
+            context.user_data.clear()
+
+            await update.message.reply_text(
+                "🔴 Ubicación en vivo activada.\n\n"
+                f"Te avisaré si aparece algo nuevo cerca (radio {RADIO_KM} km) "
+                "mientras compartas tu ubicación."
+            )
+
+            return
 
         await mostrar_avisos_cercanos(update, context, latitud, longitud)
         return
@@ -66,6 +88,17 @@ async def recibir_ubicacion(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
 
     context.user_data["direccion"] = direccion
+
+    # ==========================================
+    # ACCIDENTE / CALLE CORTADA: se publican directo, sin pedir comentario
+    # ==========================================
+
+    if context.user_data.get("tipo_aviso") in ["🚑 Accidente", "🚧 Calle cortada"]:
+
+        await publicar_aviso(update, context, comentario="")
+
+        return
+
     context.user_data["esperando_comentario"] = True
 
     calle = direccion.get("calle", "")
