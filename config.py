@@ -62,6 +62,15 @@ WHATSAPP_GROUP_ID = os.getenv("WHATSAPP_GROUP_ID")
 WHATSAPP_GROUP_ID_TEST = os.getenv("WHATSAPP_GROUP_ID_TEST")
 
 # =====================================================
+# DISCORD (manada-bot, salida de voz) - opcional
+# =====================================================
+# Si DISCORD_INGEST_URL esta vacio, el envio a Discord simplemente se
+# omite y el bot sigue funcionando igual (solo Telegram/WhatsApp).
+
+DISCORD_INGEST_URL = os.getenv("DISCORD_INGEST_URL")
+DISCORD_INGEST_TOKEN = os.getenv("DISCORD_INGEST_TOKEN")
+
+# =====================================================
 # NOMBRE DEL BOT
 # =====================================================
 

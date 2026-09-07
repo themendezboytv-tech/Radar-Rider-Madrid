@@ -1,3 +1,5 @@
+import asyncio
+
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -8,9 +10,10 @@ from telegram.ext import (
     filters,
 )
 
-from config import TOKEN
+from config import TOKEN, DISCORD_INGEST_URL
 
-from database.database import init_db
+from database.database import init_db, expirar_avisos_vencidos_con_ids
+from services.discord import retirar_alerta_discord
 
 from handlers.start import start
 from handlers.menu_principal import mostrar_menu
@@ -196,6 +199,31 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def _vigilar_caducidad_discord():
+    """
+    Bucle en segundo plano (sin dependencias nuevas: solo asyncio) que
+    avisa a Discord cuando una alerta caduca. Telegram/WhatsApp no lo
+    necesitan porque nunca anunciaron la caducidad de un aviso.
+    Se desactiva solo si DISCORD_INGEST_URL no está configurado.
+    """
+
+    if not DISCORD_INGEST_URL:
+        return
+
+    while True:
+        await asyncio.sleep(60)
+        try:
+            for aviso_id in expirar_avisos_vencidos_con_ids():
+                await asyncio.to_thread(retirar_alerta_discord, aviso_id)
+        except Exception:
+            # Best-effort: un fallo aquí nunca debe tumbar el bot.
+            pass
+
+
+async def _post_init(app: Application) -> None:
+    asyncio.create_task(_vigilar_caducidad_discord())
+
+
 def main():
 
     # ==========================================
@@ -206,7 +234,7 @@ def main():
 
     init_db()
 
-    app = Application.builder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).post_init(_post_init).build()
 
     app.add_handler(
         CommandHandler(

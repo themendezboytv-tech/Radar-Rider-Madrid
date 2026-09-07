@@ -41,8 +41,8 @@ DB_PATH = os.path.join(DB_DIR, "radar_rider_madrid.db")
 EXPIRACION_MINUTOS = {
     "🚓 Presencia policial": 90,
     "🚧 Calle cortada": 240,
-    "🚦 Tráfico": 60,
-    "🚑 Accidente": 120,
+    "🚦 Tráfico": 45,
+    "🚑 Accidente": 60,
     "⚠️ Peligro": 180,
     "📦 Otro": 90,
 }
@@ -328,16 +328,49 @@ def expirar_avisos_vencidos() -> int:
         return cursor.rowcount
 
 
+def expirar_avisos_vencidos_con_ids() -> list[int]:
+    """
+    Igual que expirar_avisos_vencidos(), pero devuelve los ids que se
+    acaban de desactivar en esta llamada. Pensado para el aviso de
+    retirada a Discord (services/discord.py); Telegram/WhatsApp no
+    necesitan saber qué ids caducaron porque nunca lo anunciaron.
+    """
+
+    ahora = datetime.utcnow().isoformat()
+
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM avisos WHERE activo = 1 AND fecha_expira <= ?",
+            (ahora,),
+        )
+        ids = [fila["id"] for fila in cursor.fetchall()]
+
+        if ids:
+            conn.execute(
+                """
+                UPDATE avisos
+                SET activo = 0
+                WHERE activo = 1 AND fecha_expira <= ?
+                """,
+                (ahora,),
+            )
+
+        return ids
+
+
 # =====================================================
 # MODERACIÓN (base para v1.7 - reputación)
 # =====================================================
 
-def marcar_como_falso(aviso_id: int) -> None:
+def marcar_como_falso(aviso_id: int) -> bool:
     """
     Incrementa el contador de votos "falso" de un aviso y,
     a partir de un umbral, lo marca como es_falso=1 (deja de
     salir en obtener_avisos_activos) y penaliza al autor con
     -1 punto de reputación.
+
+    Devuelve True solo la vez que el voto hace cruzar el umbral (para
+    poder avisar a servicios externos, ej. Discord, de la retirada).
     """
 
     UMBRAL_VOTOS_FALSO = 3
@@ -359,7 +392,7 @@ def marcar_como_falso(aviso_id: int) -> None:
         )
         fila = cursor.fetchone()
 
-        if fila and fila["votos_falso"] >= UMBRAL_VOTOS_FALSO:
+        if fila and fila["votos_falso"] == UMBRAL_VOTOS_FALSO:
 
             conn.execute(
                 "UPDATE avisos SET es_falso = 1, activo = 0 WHERE id = ?",
@@ -375,6 +408,10 @@ def marcar_como_falso(aviso_id: int) -> None:
                 """,
                 (fila["user_id"],),
             )
+
+            return True
+
+    return False
 
 
 def confirmar_aviso(aviso_id: int) -> None:
