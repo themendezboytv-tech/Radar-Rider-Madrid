@@ -53,6 +53,29 @@ def enviar_alerta_discord(
         return False
 
 
+def crear_invitacion_discord() -> str | None:
+    """Pide a manada-bot una invitación de un solo uso (24h) al servidor
+    de Discord. Devuelve la URL, o None (sin lanzar excepcion) si falta
+    configuracion o si el servicio falla por cualquier motivo."""
+
+    if not DISCORD_INGEST_URL:
+        return None
+
+    url = f"{DISCORD_INGEST_URL}/invitacion"
+
+    try:
+        r = requests.post(
+            url,
+            headers={"X-Manada-Token": DISCORD_INGEST_TOKEN},
+            timeout=5,
+        )
+        if not r.ok:
+            return None
+        return r.json().get("url")
+    except requests.RequestException:
+        return None
+
+
 def retirar_alerta_discord(id_rrm: int) -> bool:
     """Avisa a manada-bot de que una alerta ya publicada se retiro
     (caducada o descartada por moderacion). Devuelve False (sin

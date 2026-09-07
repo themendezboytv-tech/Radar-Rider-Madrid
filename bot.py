@@ -39,6 +39,7 @@ from handlers.mapa import mapa, mapa_imagen, mapa_html
 from handlers.admin import chatid
 from handlers.moderacion import votar_falso, votar_confirmado
 from handlers.ayuda import ayuda
+from handlers.discord_invite import discord_invite
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -247,6 +248,13 @@ def main():
         CommandHandler(
             "chatid",
             chatid,
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "discord",
+            discord_invite,
         )
     )
 
