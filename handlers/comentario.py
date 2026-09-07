@@ -138,6 +138,8 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
         descripcion=comentario or None,
         lat=latitud,
         lon=longitud,
+        calle=calle or None,
+        ciudad=ciudad or None,
         reportado_por=usuario.username or usuario.first_name,
         id_rrm=aviso_id,
     )

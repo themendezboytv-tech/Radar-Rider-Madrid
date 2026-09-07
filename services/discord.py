@@ -16,10 +16,14 @@ def enviar_alerta_discord(
     descripcion: str | None,
     lat: float | None,
     lon: float | None,
+    calle: str | None = None,
+    ciudad: str | None = None,
     reportado_por: str | None,
     id_rrm: int,
 ) -> bool:
     """Manda una alerta nueva al servidor de ingesta de manada-bot.
+    `calle`/`ciudad` vienen del mismo dict de geocoder.py que ya usa
+    handlers/comentario.py — no se vuelve a geocodificar aqui.
     Devuelve False (sin lanzar excepcion) si falta configuracion o si
     el envio falla por cualquier motivo."""
 
@@ -36,6 +40,8 @@ def enviar_alerta_discord(
                 "descripcion": descripcion,
                 "lat": lat,
                 "lon": lon,
+                "calle": calle,
+                "ciudad": ciudad,
                 "reportado_por": reportado_por,
                 "id_rrm": id_rrm,
             },
