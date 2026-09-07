@@ -1,7 +1,10 @@
+import asyncio
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from database.database import marcar_como_falso
+from services.discord import retirar_alerta_discord
 
 
 async def votar_falso(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -10,6 +13,9 @@ async def votar_falso(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     aviso_id = int(query.data.split(":")[1])
 
-    marcar_como_falso(aviso_id)
+    se_retiro = marcar_como_falso(aviso_id)
+
+    if se_retiro:
+        await asyncio.to_thread(retirar_alerta_discord, aviso_id)
 
     await query.answer("Voto registrado. ¡Gracias por ayudar a mantener el canal fiable!")

@@ -9,6 +9,7 @@ from config import GROUP_ID, CHANNEL_ID
 from handlers.menu_principal import mostrar_menu
 from database.database import guardar_aviso, obtener_usuarios_con_notificaciones
 from services.whatsapp import enviar_alerta_whatsapp
+from services.discord import enviar_alerta_discord
 
 
 async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -121,6 +122,22 @@ async def recibir_comentario(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # destino configurado, la alerta ya está publicada igualmente.
 
     await asyncio.to_thread(enviar_alerta_whatsapp, mensaje)
+
+    # ==========================================
+    # ENVIAR TAMBIÉN A DISCORD (best-effort)
+    # ==========================================
+    # Mismo criterio que WhatsApp: si manada-bot falla o no está
+    # configurado, la alerta ya está publicada igualmente.
+
+    await asyncio.to_thread(
+        enviar_alerta_discord,
+        tipo=tipo,
+        descripcion=comentario or None,
+        lat=latitud,
+        lon=longitud,
+        reportado_por=usuario.username or usuario.first_name,
+        id_rrm=aviso_id,
+    )
 
     # ==========================================
     # NOTIFICAR A USUARIOS CERCA (v1.8, best-effort)

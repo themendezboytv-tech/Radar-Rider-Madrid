@@ -50,6 +50,15 @@ OPENWA_SESSION_ID = os.getenv("OPENWA_SESSION_ID")
 WHATSAPP_ALERT_PHONE = os.getenv("WHATSAPP_ALERT_PHONE")
 
 # =====================================================
+# DISCORD (manada-bot, salida de voz) - opcional
+# =====================================================
+# Si DISCORD_INGEST_URL esta vacio, el envio a Discord simplemente se
+# omite y el bot sigue funcionando igual (solo Telegram/WhatsApp).
+
+DISCORD_INGEST_URL = os.getenv("DISCORD_INGEST_URL")
+DISCORD_INGEST_TOKEN = os.getenv("DISCORD_INGEST_TOKEN")
+
+# =====================================================
 # NOMBRE DEL BOT
 # =====================================================
 
