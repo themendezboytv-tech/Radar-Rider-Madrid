@@ -41,8 +41,8 @@ DB_PATH = os.path.join(DB_DIR, "radar_rider_madrid.db")
 EXPIRACION_MINUTOS = {
     "🚓 Presencia policial": 90,
     "🚧 Calle cortada": 240,
-    "🚦 Tráfico": 60,
-    "🚑 Accidente": 120,
+    "🚦 Tráfico": 45,
+    "🚑 Accidente": 60,
     "⚠️ Peligro": 180,
     "📦 Otro": 90,
 }
